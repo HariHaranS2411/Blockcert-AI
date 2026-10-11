@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="auth-wrap">
+    <div class="auth-card">
+      <h1>Create an account</h1>
+      <p class="sub">Choose the role that matches what you need to do. Every account you create is a real registration.</p>
+
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <form id="signupForm" novalidate>
+        <div class="field">
+          <label>What will you do here?</label>
+          <div class="role-picker" role="radiogroup" aria-label="Account role">
+            <label><input type="radio" name="role" value="STUDENT" checked /> Student</label>
+            <label><input type="radio" name="role" value="INSTITUTION" /> Institution</label>
+            <label><input type="radio" name="role" value="EMPLOYER" /> Employer</label>
+          </div>
+          <p class="hint">Students view their own credentials. Institutions issue and revoke certificates. Employers verify credentials.</p>
+        </div>
+
+        <div class="field">
+          <label for="name">Full name</label>
+          <input type="text" id="name" name="name" autocomplete="name" minlength="2" maxlength="120" required />
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="new-password" required minlength="8" />
+          <p class="hint">At least 8 characters, including a letter and a digit.</p>
+        </div>
+
+        <div class="field" id="studentRegField">
+          <label for="registrationNumber">Registration / roll number <span class="muted" id="regOptional">(optional)</span></label>
+          <input type="text" id="registrationNumber" name="registrationNumber" maxlength="100" />
+          <p class="hint" id="regHint">If your institution issued certificates with this number, they will be linked to your account automatically.</p>
+        </div>
+
+        <div id="institutionFields" hidden>
+          <div class="field">
+            <label for="institutionName">Institution name</label>
+            <input type="text" id="institutionName" name="institutionName" maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="website">Website <span class="muted">(optional)</span></label>
+            <input type="url" id="website" name="website" placeholder="https://" maxlength="300" />
+          </div>
+          <div class="field">
+            <label for="address">Address <span class="muted">(optional)</span></label>
+            <textarea id="address" name="address" maxlength="500" rows="2"></textarea>
+          </div>
+          <div class="alert alert-info show">Institution accounts start as <strong>PENDING</strong>. An administrator must approve the institution before its certificates report a verified issuer.</div>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit" id="signupBtn">Create account</button>
+      </form>
+
+      <p class="small muted mt-2 mb-0">Already registered? <a href="/login.html">Log in</a></p>
+    </div>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

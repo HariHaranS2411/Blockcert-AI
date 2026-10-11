@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="dash">
+    <div class="dash-main">
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <div class="dash-head">
+        <div>
+          <h1>Admin dashboard</h1>
+          <p>What can I do here? Review real system counts, approve institutions, manage users and read audit logs. Admins cannot bypass cryptographic verification.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" type="button" id="refreshBtn">Refresh</button>
+          <a class="btn btn-outline" href="/verification-history.html">Verification history</a>
+        </div>
+      </div>
+
+      <div class="health-chips" id="healthChips"></div>
+
+      <div class="stat-row mt-2" id="statRow"></div>
+
+      <div class="tabs" role="tablist" aria-label="Admin sections">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="admInstitutions">Institutions</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="admUsers">Users</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="admCertificates">Certificates</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="admVerifications">Verifications</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="admAudit">Audit logs</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-admInstitutions">
+        <div class="panel"><div class="panel-body" id="instArea"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-admUsers">
+        <div class="panel"><div class="panel-body" id="usersArea"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-admCertificates">
+        <div class="panel"><div class="panel-body" id="certsArea"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-admVerifications">
+        <div class="panel"><div class="panel-body" id="verifsArea"></div></div>
+      </div>
+      <div class="tab-panel" id="tab-admAudit">
+        <div class="panel"><div class="panel-body" id="auditArea"></div></div>
+      </div>
+    </div>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

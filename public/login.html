@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="auth-wrap">
+    <div class="auth-card">
+      <h1>Log in</h1>
+      <p class="sub">Access your BlockCert AI workspace. What can I do here? Sign in to issue, manage or verify certificates.</p>
+
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required />
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" id="loginBtn">Log in</button>
+      </form>
+
+      <p class="small muted mt-2"><a href="/forgot-password.html">Forgot your password?</a></p>
+
+      <p class="small muted mt-2 mb-0">No account yet? <a href="/signup.html">Register</a> · Public verification works without an account on the <a href="/verify.html">Verify</a> page.</p>
+    </div>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

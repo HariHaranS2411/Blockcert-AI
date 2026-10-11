@@ -1,0 +1,42 @@
+{
+  "name": "blockcert-ai",
+  "version": "1.0.0",
+  "description": "BlockCert AI - AI-powered blockchain certificate verification and fraud detection platform. Real data only.",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "chain": "ganache --wallet.totalAccounts 10 --chain.chainId 1337 --server.port 7545",
+    "contract:deploy": "node scripts/deploy-contract.js",
+    "db:migrate": "node database/migrate.js",
+    "setup:admin": "node scripts/create-admin.js"
+  },
+  "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "ethers": "^6.15.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.16.3",
+    "qr-scanner": "^1.4.2",
+    "qrcode": "^1.5.4",
+    "tesseract.js": "^5.1.1"
+  },
+  "devDependencies": {
+    "embedded-postgres": "^17.10.0-beta.17",
+    "ganache": "^7.9.2",
+    "solc": "^0.8.30"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

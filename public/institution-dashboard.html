@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Institution Dashboard — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="dash">
+    <div class="dash-main">
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <div class="dash-head">
+        <div>
+          <h1>Institution dashboard</h1>
+          <p>What can I do here? Issue certificates, manage your register, revoke credentials and review verification activity.</p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="/issue-certificate.html">Issue certificate</a>
+          <a class="btn btn-outline" href="/verify.html">Verify a certificate</a>
+        </div>
+      </div>
+
+      <div id="instStatusBanner"></div>
+
+      <div class="stat-row" id="statRow"></div>
+
+      <div class="dash-grid-2">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Recent certificates</h2>
+            <button class="btn btn-ghost btn-sm" type="button" id="refreshBtn">Refresh</button>
+          </div>
+          <div class="panel-body flush" id="recentCerts">
+            <div class="panel-body" id="recentCertsBody"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Recent verification activity</h2></div>
+          <div class="panel-body" id="recentVerifications"></div>
+        </section>
+      </div>
+
+      <section class="panel mt-3" id="register">
+        <div class="panel-head">
+          <h2>Certificate register</h2>
+          <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="Search ID, institution or type" aria-label="Search certificates" />
+            <select id="statusFilter" aria-label="Filter by status">
+              <option value="">All statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="REVOKED">Revoked</option>
+              <option value="SUSPENDED">Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div class="panel-body flush">
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr>
+                  <th>Certificate ID</th><th>Credential</th><th>Type</th><th>Student</th><th>Status</th><th>Blockchain</th><th>Issued</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="certTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="certPager"></div>
+        </div>
+      </section>
+
+      <div class="dash-grid-2 mt-3">
+        <section class="panel" id="bulkIssue">
+          <div class="panel-head"><h2>Bulk issuance</h2></div>
+          <div class="panel-body">
+            <p class="small muted">Issue many certificates from a CSV. Required columns: <span class="mono">studentName, registerNumber, studentEmail, studentPassword, degree, certificateType, issueDate, documentPath</span>. Optional: <span class="mono">department, graduationYear</span> — studentEmail and studentPassword are <strong>required</strong>: if no student account exists for that email, one is created so the student can log in with exactly those credentials and see only their certificates. Each row's <span class="mono">documentPath</span> must be the <strong>file name of an attached document</strong> below, or a file already in the server upload directory. Each row is processed individually with real per-row results.</p>
+            <p class="small mb-2"><a href="/api/certificates/bulk-template" download>Download the CSV template (header row only)</a></p>
+            <form id="bulkForm">
+              <div class="upload-zone" id="bulkZone" tabindex="0" role="button" aria-label="Upload issuance CSV">
+                <span class="uz-icon" aria-hidden="true">⬆</span>
+                <strong>Drop a CSV here or click to browse</strong>
+                <p class="file-name" id="bulkFileName" hidden></p>
+              </div>
+              <input type="file" id="bulkInput" accept=".csv,text/csv" hidden />
+              <div class="upload-zone mt-2" id="bulkDocsZone" tabindex="0" role="button" aria-label="Attach certificate documents">
+                <span class="uz-icon" aria-hidden="true">📄</span>
+                <strong>Attach the certificate documents (PDF, PNG or JPG)</strong>
+                <p class="small muted mb-0">Each CSV row references a document by its file name in <span class="mono">documentPath</span>.</p>
+                <p class="file-name" id="bulkDocsName" hidden></p>
+              </div>
+              <input type="file" id="bulkDocsInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" multiple hidden />
+              <button class="btn btn-primary mt-2" type="submit" id="bulkBtn">Run bulk issuance</button>
+            </form>
+            <div id="bulkResults" class="mt-2"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="revokeSection">
+          <div class="panel-head"><h2>Revoke a certificate</h2></div>
+          <div class="panel-body">
+            <p class="small muted">Revocation sends a real blockchain transaction and marks the record revoked. Records are never deleted.</p>
+            <form id="revokeForm">
+              <div class="field">
+                <label for="revokeCertId">Certificate ID</label>
+                <input type="text" id="revokeCertId" placeholder="CERT-YYYY-XXXXXX" required />
+              </div>
+              <div class="field">
+                <label for="revokeReason">Reason</label>
+                <textarea id="revokeReason" required minlength="5" maxlength="500" placeholder="Why is this certificate being revoked?"></textarea>
+              </div>
+              <button class="btn btn-danger" type="submit">Revoke certificate…</button>
+            </form>
+            <div id="revokeResult" class="mt-2"></div>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel mt-3" id="profilePanel">
+        <div class="panel-head"><h2>Institution profile</h2></div>
+        <div class="panel-body" id="profileBody"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- revocation confirmation dialog -->
+  <div class="modal-backdrop" id="revokeModal" role="dialog" aria-modal="true" aria-labelledby="revokeModalTitle">
+    <div class="modal">
+      <h2 id="revokeModalTitle">Confirm revocation</h2>
+      <p>You are about to revoke <strong id="revokeModalCertId"></strong>. This sends a real blockchain transaction and cannot be undone.</p>
+      <div class="fact"><div class="k">Reason</div><div class="v" id="revokeModalReason"></div></div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" type="button" id="revokeCancel">Cancel</button>
+        <button class="btn btn-danger" type="button" id="revokeConfirm">Confirm revoke</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/institution.js"></script>
+</body>
+</html>

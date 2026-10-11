@@ -1,0 +1,132 @@
+/* ============================================================
+   BlockCert AI - responsive rules (mobile-first breakpoints)
+   Below 768px: sidebar collapses, cards stack, tables scroll,
+   upload areas are full width, technical details move below.
+   ============================================================ */
+
+@media (max-width: 1240px) {
+  .mini-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 1100px) {
+  .dash-columns { grid-template-columns: 1fr; }
+  .topbar-search { max-width: 380px; }
+  .dash-hero .dh-art { display: none; }
+}
+
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .hero-grid { grid-template-columns: 1fr; }
+  .dash-grid-3 { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 860px) {
+  .dash { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: min(300px, 85vw);
+    height: 100vh;
+    z-index: 300;
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+    box-shadow: var(--shadow);
+    padding-top: 1.2rem;
+  }
+  .sidebar.open { transform: none; }
+  .sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--bg-soft);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 0.5rem 0.8rem;
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+  }
+  .sidebar-backdrop {
+    position: fixed; inset: 0; background: rgba(2, 6, 18, 0.6);
+    z-index: 250; display: none;
+  }
+  .sidebar-backdrop.show { display: block; }
+  .dash-grid-2, .dash-grid-3, .ocr-split, .compare, .check-grid { grid-template-columns: 1fr; }
+  .facts, .result-facts { grid-template-columns: 1fr; }
+  .mini-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .nav-toggle { display: block; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--line);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.5rem 4%;
+    box-shadow: var(--shadow);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links li { padding: 0.5rem 0; }
+  .nav-links .btn { width: 100%; }
+
+  /* top bar: hide search + chip text on small screens */
+  .topbar-search { display: none; }
+  .user-chip .uc-text { display: none; }
+  .user-chip { padding: 0.25rem; }
+
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .role-picker { grid-template-columns: 1fr; }
+
+  .hero { padding: 2.6rem 0 2.2rem; }
+  .section { padding: 2.2rem 0; }
+
+  /* tables become horizontally scrollable (container already sets overflow) */
+  table.data { min-width: 560px; }
+
+  /* upload areas go full width */
+  .upload-zone { padding: 1.5rem 0.8rem; }
+  .btn-row .btn { flex: 1 1 auto; }
+
+  /* technical details + AI blocks stack below the result */
+  details.tech { margin-top: 1rem; }
+
+  .dash-head { flex-direction: column; align-items: stretch; }
+  .dash-head .btn-row .btn { flex: 1; }
+  .toolbar { width: 100%; }
+  .toolbar input[type='text'], .toolbar select, .toolbar .grow { min-width: 0; width: 100%; }
+
+  .dash-hero { padding: 1.3rem 1.2rem; }
+  .dh-chips { gap: 0.6rem; }
+  .dh-chip { width: 88px; }
+  .qa-grid { grid-template-columns: 1fr 1fr; }
+
+  .footer-grid { grid-template-columns: 1fr; }
+  .modal { padding: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .stat .value { font-size: 1.45rem; }
+  .auth-card { padding: 1.3rem; }
+  .result-hero { flex-direction: column; gap: 0.6rem; }
+  .qr-box img { width: 160px; height: 160px; }
+  .qa-grid { grid-template-columns: 1fr; }
+  .summary-body { justify-content: center; }
+}
+
+/* wide desktops */
+@media (min-width: 1440px) {
+  .container { width: min(1280px, 92%); }
+  .dash-columns { grid-template-columns: minmax(0, 1fr) 340px; }
+}

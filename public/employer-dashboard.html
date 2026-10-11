@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employer Verification Portal — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="dash">
+    <div class="dash-main">
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <div class="dash-head">
+        <div>
+          <h1>Verification portal</h1>
+          <p>What can I do here? Verify a candidate's certificate by ID, document upload or QR scan — or bulk-verify a CSV — and download real reports.</p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-outline" href="/verification-history.html">Verification history</a>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Verification method">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="empId">Enter ID</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="empUpload">Upload</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="empQr">Scan QR</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="empBulk">Bulk CSV</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-empId">
+        <div class="panel"><div class="panel-body">
+          <form id="empIdForm">
+            <div class="field">
+              <label for="empCertId">Certificate ID</label>
+              <input type="text" id="empCertId" placeholder="CERT-YYYY-XXXXXX" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary" type="submit">Verify certificate</button>
+          </form>
+        </div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-empUpload">
+        <div class="panel"><div class="panel-body">
+          <form id="empUploadForm">
+            <div class="upload-zone" id="empZone" tabindex="0" role="button" aria-label="Upload certificate document">
+              <span class="uz-icon" aria-hidden="true">⬆</span>
+              <strong>Drop a certificate here or click to browse</strong>
+              <p>PDF, PNG or JPG up to 10 MB.</p>
+              <p class="file-name" id="empFileName" hidden></p>
+            </div>
+            <input type="file" id="empFileInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" hidden />
+            <button class="btn btn-primary mt-2" type="submit">Verify document</button>
+          </form>
+        </div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-empQr">
+        <div class="panel"><div class="panel-body">
+          <div class="scanner-box" id="empScannerBox"><p class="scanner-status" id="empScannerStatus">Camera not started.</p></div>
+          <div class="btn-row mt-2">
+            <button class="btn btn-primary" type="button" id="empStartScan">Start camera scan</button>
+            <button class="btn btn-outline" type="button" id="empStopScan" hidden>Stop scanning</button>
+          </div>
+          <form id="empPasteForm" class="mt-2">
+            <div class="field">
+              <label for="empPaste">QR content or certificate ID</label>
+              <input type="text" id="empPaste" placeholder="Paste the scanned text" />
+            </div>
+            <button class="btn btn-outline" type="submit">Verify pasted content</button>
+          </form>
+        </div></div>
+      </div>
+
+      <div class="tab-panel" id="tab-empBulk">
+        <div class="panel"><div class="panel-body">
+          <p class="small muted">Upload a CSV with a <span class="mono">certificateId</span> column. Each ID is verified against the real database and blockchain.</p>
+          <div class="btn-row">
+            <a class="btn btn-outline btn-sm" href="/api/employer/bulk-template">Download CSV template</a>
+          </div>
+          <form id="empBulkForm" class="mt-2">
+            <div class="upload-zone" id="empBulkZone" tabindex="0" role="button" aria-label="Upload verification CSV">
+              <span class="uz-icon" aria-hidden="true">⬆</span>
+              <strong>Drop a CSV here or click to browse</strong>
+              <p class="file-name" id="empBulkFileName" hidden></p>
+            </div>
+            <input type="file" id="empBulkInput" accept=".csv,text/csv" hidden />
+            <button class="btn btn-primary mt-2" type="submit" id="empBulkBtn">Run bulk verification</button>
+          </form>
+          <div id="empBulkResults" class="mt-2"></div>
+        </div></div>
+      </div>
+
+      <!-- immediate result -->
+      <div id="empResult" class="mt-3" aria-live="polite"></div>
+
+      <section class="panel mt-3">
+        <div class="panel-head">
+          <h2>My verification history</h2>
+          <div class="btn-row">
+            <button class="btn btn-outline btn-sm" type="button" id="exportCsvBtn">Download CSV report</button>
+          </div>
+        </div>
+        <div class="panel-body" id="empHistory"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/qr.js"></script>
+  <script src="/js/employer.js"></script>
+</body>
+</html>

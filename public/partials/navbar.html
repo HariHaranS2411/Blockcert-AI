@@ -1,0 +1,48 @@
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="navbar">
+  <div class="container navbar-inner">
+    <a class="brand" href="/index.html" aria-label="BlockCert AI home">
+      <span class="brand-mark" aria-hidden="true">⛨</span>
+      <span>
+        BlockCert <em>AI</em>
+        <span class="brand-tag">Trust the Certificate. Verify the Proof.</span>
+      </span>
+    </a>
+
+    <div class="topbar-search" id="topbarSearch">
+      <form action="/verify.html" method="get" role="search">
+        <span class="ts-icon" aria-hidden="true">⌕</span>
+        <input type="text" name="id" aria-label="Search certificates, institutions, or verification ID"
+               placeholder="Search certificates, institutions, or verification ID…" autocomplete="off" />
+      </form>
+    </div>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">☰</button>
+
+    <div class="topbar-right">
+      <a class="bell-link" href="/verification-history.html" id="navBell" aria-label="Verification activity" title="Verification activity">
+        <span aria-hidden="true">🔔</span>
+        <span class="bell-dot" id="navBellDot" hidden></span>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/index.html" data-nav="/">Home</a></li>
+        <li><a href="/verify.html" data-nav="/verify">Verify</a></li>
+        <li><a href="/how-it-works.html" data-nav="/how-it-works">How It Works</a></li>
+        <li><a href="/about.html" data-nav="/about">About</a></li>
+        <li id="navDashLink" hidden><a href="/student-dashboard.html" id="navDashAnchor">Dashboard</a></li>
+        <li id="navAuthLink"><a href="/login.html" class="btn btn-outline btn-sm" id="navLoginBtn">Log in</a></li>
+        <li id="navUserLink" hidden>
+          <a class="user-chip" id="navUserChip" href="#">
+            <span class="avatar" id="navUserAvatar" aria-hidden="true">?</span>
+            <span class="uc-text">
+              <span class="uc-name" id="navUserName">…</span>
+              <span class="uc-role" id="navUserRole"></span>
+            </span>
+          </a>
+          <button class="btn btn-outline btn-sm" id="navLogoutBtn" type="button">Log out</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>

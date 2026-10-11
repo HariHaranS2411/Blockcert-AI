@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlockCert AI — Verify Academic Certificates with AI + Blockchain</title>
+  <meta name="description" content="BlockCert AI combines intelligent fraud detection with blockchain-backed verification to protect academic credentials." />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Trust the Certificate. Verify the Proof.</span>
+          <h1>Verify Academic Certificates with AI + Blockchain</h1>
+          <p class="subtitle">BlockCert AI combines intelligent fraud detection with blockchain-backed verification to protect academic credentials.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/verify.html">Verify Certificate</a>
+            <a class="btn btn-outline" href="/issue-certificate.html">Issue Certificate</a>
+            <a class="btn btn-ghost" href="/how-it-works.html">See How It Works</a>
+          </div>
+          <div class="trust-note mt-3">
+            <span aria-hidden="true">ⓘ</span>
+            <span>AI provides a document-risk assessment. Blockchain verification confirms whether the document matches the official issuer record. AI results are not absolute proof of authenticity.</span>
+          </div>
+        </div>
+        <div class="reveal">
+          <div class="flow" aria-label="Verification flow">
+            <span class="flow-node">Certificate</span>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <span class="flow-node">AI Analysis</span>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <span class="flow-node">SHA-256</span>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <span class="flow-node">Blockchain</span>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+          </div>
+          <div class="flow mt-1">
+            <span class="flow-node good">✓ Verified</span>
+            <span class="flow-node warn">⚠ Suspicious</span>
+            <span class="flow-node bad">✕ Tampered</span>
+          </div>
+          <p class="text-center small muted mt-1" id="landingHealth">Checking system status…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE COUNTS (omitted entirely when the database is unavailable) -->
+    <section class="section" id="liveCountsSection" hidden>
+      <div class="container">
+        <div class="stat-row" id="liveCounts"></div>
+        <p class="text-center small muted">Live counts read from the database at this moment.</p>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>How It Works</h2>
+          <p>Five steps from upload to a trustworthy result — every step performs a real operation.</p>
+        </div>
+        <div class="steps reveal">
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Upload</h3><p>The issuing institution uploads the real certificate document (PDF, PNG or JPG) and validates it.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Extract</h3><p>OCR reads the document text. A human reviews and corrects every extracted field before anything is issued.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Analyze</h3><p>AI examines the document for suspicious manipulation and returns a risk score with per-check findings.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Verify</h3><p>A SHA-256 fingerprint is calculated and registered on the blockchain by the issuing institution's key.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Report</h3><p>Anyone can verify by ID, upload or QR and get an honest result: Verified, Suspicious, Tampered, Revoked or Not Found.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>What BlockCert AI does</h2>
+          <p>Core capability of the platform.</p>
+        </div>
+        <div class="grid grid-3 reveal">
+          <div class="feature"><span class="icon" aria-hidden="true">◉</span><h3>AI Fraud Detection</h3><p>Real AI analysis of font, layout, signature and metadata anomalies with a transparent risk score.</p></div>
+          <div class="feature"><span class="icon" aria-hidden="true">⛓</span><h3>Blockchain Security</h3><p>Every certificate fingerprint is written to an immutable on-chain record by the issuer.</p></div>
+          <div class="feature"><span class="icon" aria-hidden="true">#</span><h3>SHA-256 Integrity</h3><p>One bit changed in the document produces a completely different fingerprint — mismatch means tampering.</p></div>
+          <div class="feature"><span class="icon" aria-hidden="true">▦</span><h3>QR Verification</h3><p>Each certificate gets a QR code pointing at its public verification page. Scanning runs a real chain lookup.</p></div>
+          <div class="feature"><span class="icon" aria-hidden="true">⊘</span><h3>Certificate Revocation</h3><p>Institutions can revoke with a reason. The record is flagged, never deleted, with a real on-chain transaction.</p></div>
+          <div class="feature"><span class="icon" aria-hidden="true">✓</span><h3>Employer Verification</h3><p>Employers verify by ID, upload, QR scan or bulk CSV, and download real verification reports.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI vs BLOCKCHAIN -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>AI vs Blockchain</h2>
+          <p>Core principle: AI detects suspicious document manipulation. Blockchain verifies the official record.</p>
+        </div>
+        <div class="compare reveal">
+          <div class="card ai">
+            <span class="badge badge-info"><span aria-hidden="true">◉</span> Supporting signal</span>
+            <h3 class="mt-1">AI checks the document</h3>
+            <ul>
+              <li>Font, size, alignment and layout consistency</li>
+              <li>Logo and signature region integrity</li>
+              <li>Image manipulation and copy/paste artifacts</li>
+              <li>Certificate number and date anomalies</li>
+              <li>Missing required fields and metadata issues</li>
+            </ul>
+            <p class="small muted mb-0 mt-1">Returns a risk score (0–100) and per-check findings. A high score alone never brands a certificate fake.</p>
+          </div>
+          <div class="card">
+            <span class="badge badge-ok"><span aria-hidden="true">⛓</span> Authoritative check</span>
+            <h3 class="mt-1">Blockchain checks the record</h3>
+            <ul>
+              <li>Immutable registration of the SHA-256 fingerprint</li>
+              <li>Issuer identity via the registration key</li>
+              <li>Timestamp of registration</li>
+              <li>Revocation status of the official record</li>
+              <li>Cryptographic match against the uploaded document</li>
+            </ul>
+            <p class="small muted mb-0 mt-1">If the fingerprint does not match the on-chain record, the document has been altered — regardless of what AI says.</p>
+          </div>
+        </div>
+        <div class="trust-note mt-3">
+          <span aria-hidden="true">ⓘ</span>
+          <span><strong>Trust statement:</strong> Blockchain verifies the registered cryptographic record. AI provides additional signals. AI results are not absolute proof.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="container text-center">
+        <h2 class="reveal">Ready to verify a credential?</h2>
+        <p class="muted reveal">Public verification works without an account.</p>
+        <div class="btn-row reveal" style="justify-content:center">
+          <a class="btn btn-primary" href="/verify.html">Verify Certificate</a>
+          <a class="btn btn-outline" href="/signup.html">Create an account</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/common.js"></script>
+</body>
+</html>

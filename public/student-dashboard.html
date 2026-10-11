@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Credentials — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="dash">
+    <div class="dash-main">
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <div class="dash-columns">
+        <div class="dash-col-main">
+
+          <!-- welcome hero -->
+          <section class="dash-hero">
+            <h2 id="heroTitle">Welcome back!</h2>
+            <p class="dh-sub">Manage your certificates, verify credentials and build a trusted future with BlockCert AI.</p>
+            <div class="dh-chips">
+              <div class="dh-chip green">
+                <span class="dhc-icon" aria-hidden="true">⛓</span>
+                <span class="dhc-label">Blockchain<br />Verified</span>
+              </div>
+              <div class="dh-chip violet">
+                <span class="dhc-icon" aria-hidden="true">✳</span>
+                <span class="dhc-label">AI Fraud<br />Detection</span>
+              </div>
+              <div class="dh-chip blue">
+                <span class="dhc-icon" aria-hidden="true">⧉</span>
+                <span class="dhc-label">OCR<br />Extraction</span>
+              </div>
+              <div class="dh-chip cyan">
+                <span class="dhc-icon" aria-hidden="true">▦</span>
+                <span class="dhc-label">QR<br />Verification</span>
+              </div>
+            </div>
+            <svg class="dh-art" viewBox="0 0 220 180" role="img" aria-label="Decorative certificate graphic">
+              <defs>
+                <linearGradient id="certGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#60a5fa" />
+                  <stop offset="100%" stop-color="#8b5cf6" />
+                </linearGradient>
+              </defs>
+              <g fill="none" stroke="url(#certGrad)" stroke-width="2">
+                <rect x="70" y="30" width="80" height="105" rx="6" fill="rgba(13,21,38,0.85)" />
+                <line x1="82" y1="50" x2="138" y2="50" />
+                <line x1="82" y1="62" x2="138" y2="62" />
+                <line x1="82" y1="74" x2="122" y2="74" />
+                <circle cx="110" cy="100" r="13" />
+                <path d="M104 96 l4 5 8-9" stroke="#34d399" />
+                <path d="M103 110 l-4 16 11-7 11 7-4-16" />
+              </g>
+              <g fill="none" stroke="rgba(96,165,250,0.5)" stroke-width="1.5">
+                <rect x="16" y="24" width="26" height="26" rx="4" transform="rotate(12 29 37)" />
+                <rect x="182" y="120" width="22" height="22" rx="4" transform="rotate(-14 193 131)" />
+                <rect x="20" y="128" width="18" height="18" rx="4" transform="rotate(-8 29 137)" />
+                <rect x="176" y="20" width="24" height="24" rx="4" transform="rotate(18 188 32)" />
+              </g>
+            </svg>
+          </section>
+
+          <!-- recent certificates -->
+          <section class="panel" id="recentCerts">
+            <div class="panel-head">
+              <h2><span class="ph-icon" aria-hidden="true">▤</span>Recent Certificates</h2>
+              <div class="btn-row">
+                <button class="btn btn-ghost btn-sm" type="button" id="refreshBtn">Refresh</button>
+                <a class="view-all" href="#recentCerts">View All →</a>
+              </div>
+            </div>
+            <div class="panel-body flush" id="certArea"></div>
+          </section>
+
+          <!-- verification history -->
+          <section class="panel mt-3">
+            <div class="panel-head">
+              <h2><span class="ph-icon" aria-hidden="true">⏱</span>Verification Activity</h2>
+              <a class="view-all" href="/verification-history.html">View All →</a>
+            </div>
+            <div class="panel-body" id="historyArea"></div>
+          </section>
+        </div>
+
+        <div class="dash-col-side">
+          <!-- credential summary -->
+          <section class="panel summary-card" id="summaryCard">
+            <div class="summary-head">
+              <h2>Your Credential Summary</h2>
+              <a class="view-all" href="/credential-profile.html" title="Open credential profile">◐</a>
+            </div>
+            <div class="summary-body" id="summaryBody"></div>
+            <div class="summary-total"><span>Total Certificates</span><strong id="summaryTotal">0</strong></div>
+          </section>
+
+          <!-- AI resume maker: questionnaire first, then the resume -->
+          <section class="panel mt-3" id="resumeCard">
+            <div class="panel-head">
+              <h2><span class="ph-icon" aria-hidden="true">✦</span>AI Resume Maker</h2>
+              <div class="btn-row">
+                <button class="btn btn-outline btn-sm" type="button" id="resumeEditBtn">Edit resume details</button>
+                <button class="btn btn-primary btn-sm" type="button" id="resumeGenerateBtn">Build resume</button>
+              </div>
+            </div>
+            <div class="panel-body" id="resumeArea">
+              <p class="small muted mb-0">First fill in your resume details — personal information, education, skills, projects, internships (skippable for freshers), certifications and career preferences. Then build the resume: those answers become the resume content, alongside your real blockchain-verified certificates. Nothing is invented.</p>
+            </div>
+          </section>
+
+          <!-- quick actions -->
+          <section class="panel" id="quickActions">
+            <div class="panel-head"><h2><span class="ph-icon" aria-hidden="true">⚡</span>Quick Actions</h2></div>
+            <div class="panel-body">
+              <div class="qa-grid">
+                <a class="qa-tile blue" href="/verify.html">
+                  <span class="qa-icon" aria-hidden="true">🛡</span>Verify Certificate<span class="qa-arrow" aria-hidden="true">→</span>
+                </a>
+                <a class="qa-tile violet" href="/credential-profile.html">
+                  <span class="qa-icon" aria-hidden="true">◧</span>Credential Profile<span class="qa-arrow" aria-hidden="true">→</span>
+                </a>
+                <a class="qa-tile green" href="#recentCerts">
+                  <span class="qa-icon" aria-hidden="true">▤</span>View My Certificates<span class="qa-arrow" aria-hidden="true">→</span>
+                </a>
+                <a class="qa-tile amber" href="/verify.html">
+                  <span class="qa-icon" aria-hidden="true">▦</span>Scan QR Code<span class="qa-arrow" aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- bottom mini cards -->
+      <div class="mini-cards mt-3">
+        <section class="mini-card">
+          <div class="mc-head"><h3><span aria-hidden="true">📈</span>Verification Activity</h3><a class="view-all" href="/verification-history.html">View All →</a></div>
+          <div id="activityChart"></div>
+        </section>
+
+        <section class="mini-card">
+          <div class="mc-head"><h3><span aria-hidden="true">✳</span>AI Analysis</h3></div>
+          <div id="aiCard"></div>
+        </section>
+
+        <section class="mini-card">
+          <div class="mc-head"><h3><span aria-hidden="true">⬡</span>Blockchain Network</h3><span id="chainStatus"></span></div>
+          <div class="chain-rows" id="chainCard"></div>
+        </section>
+
+        <section class="mini-card help-card">
+          <div class="mc-head"><h3><span aria-hidden="true">☺</span>Need Help?</h3></div>
+          <p class="hc-note">Get support or learn more about how BlockCert AI keeps credentials trustworthy.</p>
+          <a class="btn btn-primary btn-sm" href="/about.html">Contact Support →</a>
+          <div class="hc-tags"><span>Secure</span><span>Transparent</span><span>Trusted</span></div>
+        </section>
+      </div>
+    </div>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/student.js"></script>
+</body>
+</html>

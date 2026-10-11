@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify a Certificate — BlockCert AI</title>
+  <meta name="description" content="Verify an academic certificate by ID, document upload or QR code." />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main">
+    <section class="section" style="padding-top:2.2rem">
+      <div class="container" style="max-width:880px">
+        <h1>Verify a certificate</h1>
+        <p class="muted">What can I do here? Check whether a certificate matches the officially registered blockchain record — by certificate ID, by uploading the document, or by scanning its QR code. No account required.</p>
+
+        <div class="trust-note mb-0" style="margin-bottom:1.2rem">
+          <span aria-hidden="true">ⓘ</span>
+          <span>AI provides a document-risk assessment. Blockchain verification confirms whether the document matches the official issuer record. AI results are not absolute proof of authenticity.</span>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Verification method">
+          <button class="tab active" role="tab" aria-selected="true" data-tab="byId">Enter ID</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="byUpload">Upload document</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="byQr">Scan QR</button>
+        </div>
+
+        <!-- BY ID -->
+        <div class="tab-panel active" id="tab-byId">
+          <div class="panel"><div class="panel-body">
+            <form id="idForm">
+              <div class="field">
+                <label for="certificateId">Certificate ID</label>
+                <input type="text" id="certificateId" name="certificateId" placeholder="CERT-YYYY-XXXXXX" autocomplete="off" />
+                <p class="hint">Format: CERT- followed by the year and a six-digit number, e.g. the ID printed on the certificate.</p>
+              </div>
+              <button class="btn btn-primary" type="submit" id="idBtn">Verify certificate</button>
+            </form>
+          </div></div>
+        </div>
+
+        <!-- BY UPLOAD -->
+        <div class="tab-panel" id="tab-byUpload">
+          <div class="panel"><div class="panel-body">
+            <form id="uploadForm">
+              <div class="field">
+                <label for="certificateIdUpload">Certificate ID <span class="muted">(optional — a hash lookup is used when blank)</span></label>
+                <input type="text" id="certificateIdUpload" placeholder="CERT-YYYY-XXXXXX" autocomplete="off" />
+              </div>
+              <div class="upload-zone" id="uploadZone" tabindex="0" role="button" aria-label="Upload certificate document">
+                <span class="uz-icon" aria-hidden="true">⬆</span>
+                <strong>Drop a certificate here or click to browse</strong>
+                <p>PDF, PNG or JPG up to 10 MB. The file is fingerprinted with SHA-256 and compared on-chain.</p>
+                <p class="file-name" id="uploadFileName" hidden></p>
+              </div>
+              <input type="file" id="uploadInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" hidden />
+              <button class="btn btn-primary mt-2" type="submit" id="uploadBtn">Verify document</button>
+            </form>
+            <div class="loading-row" id="uploadBusy" hidden><span class="spinner" aria-hidden="true"></span> <span id="uploadBusyText">Analyzing document…</span></div>
+          </div></div>
+        </div>
+
+        <!-- BY QR -->
+        <div class="tab-panel" id="tab-byQr">
+          <div class="panel"><div class="panel-body">
+            <div class="scanner-box" id="scannerBox">
+              <p class="scanner-status" id="scannerStatus">Camera not started.</p>
+            </div>
+            <div class="btn-row mt-2">
+              <button class="btn btn-primary" type="button" id="startScanBtn">Start camera scan</button>
+              <button class="btn btn-outline" type="button" id="stopScanBtn" hidden>Stop scanning</button>
+            </div>
+            <p class="hint mt-1">Scanning opens the certificate's public verification page data and runs a real blockchain lookup. You can also paste the QR content below.</p>
+            <form id="qrPasteForm" class="mt-1">
+              <div class="field">
+                <label for="qrPaste">QR content or certificate ID</label>
+                <input type="text" id="qrPaste" placeholder="Paste the scanned text" />
+              </div>
+              <button class="btn btn-outline" type="submit">Verify pasted content</button>
+            </form>
+          </div></div>
+        </div>
+
+        <!-- RESULT -->
+        <div id="resultArea" class="mt-3" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/qr.js"></script>
+  <script src="/js/verify.js"></script>
+</body>
+</html>

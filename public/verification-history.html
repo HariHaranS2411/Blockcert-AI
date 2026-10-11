@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verification History — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main">
+    <section class="section" style="padding-top:2rem">
+      <div class="container" style="max-width:1040px">
+        <div class="alert" id="pageAlert" role="alert"></div>
+
+        <div class="dash-head">
+          <div>
+            <h1 style="font-size:1.5rem">Verification history</h1>
+            <p>What can I do here? Review real verification events you have performed (or on your certificates), with hash, blockchain, AI and final results.</p>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-outline btn-sm" type="button" id="exportBtn">Download CSV</button>
+            <a class="btn btn-primary btn-sm" href="/verify.html">New verification</a>
+          </div>
+        </div>
+
+        <div class="stat-row" id="summaryRow"></div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Events</h2>
+            <div class="toolbar">
+              <input type="text" id="refFilter" placeholder="Filter by certificate ID" aria-label="Filter by certificate ID" />
+              <select id="resultFilter" aria-label="Filter by result">
+                <option value="">All results</option>
+                <option value="VERIFIED">Verified</option>
+                <option value="SUSPICIOUS">Suspicious</option>
+                <option value="TAMPERED">Tampered</option>
+                <option value="REVOKED">Revoked</option>
+                <option value="NOT_FOUND">Not found</option>
+              </select>
+            </div>
+          </div>
+          <div class="panel-body" id="historyArea"></div>
+          <div class="pager" id="historyPager"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/history.js"></script>
+</body>
+</html>

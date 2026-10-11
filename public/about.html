@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main">
+    <section class="section" style="padding-top:2.4rem">
+      <div class="container" style="max-width:880px">
+        <span class="eyebrow">About BlockCert AI</span>
+        <h1>Trust the Certificate. Verify the Proof.</h1>
+        <p class="muted">What can I do here? Understand how verification works, what data lives where, and how your information is protected.</p>
+
+        <div class="card mt-3">
+          <h2>The fraud problem</h2>
+          <p>Forged academic credentials are easy to produce and hard to detect manually. A visually convincing fake can carry an invented grade, an unauthorised degree or a revoked qualification. Employers and admissions teams typically have no fast way to confirm that a document matches what the institution actually issued.</p>
+        </div>
+
+        <div class="card">
+          <h2>Why hashes matter</h2>
+          <p>A SHA-256 hash is a 64-character fingerprint derived from the exact bytes of a document. It is deterministic (the same file always produces the same fingerprint) and collision-resistant (any change — one character, one pixel — produces a completely different fingerprint).</p>
+          <p class="mb-0">Verification therefore does not need the original file: it only needs the fingerprint of the document in hand and the fingerprint registered at issuance.</p>
+        </div>
+
+        <div class="card">
+          <h2>Why blockchain matters</h2>
+          <p>Storing fingerprints in an ordinary database leaves them editable by whoever controls that database. Writing them to an EVM chain makes the record immutable and independently checkable: the issuer address and timestamp are part of the record, and anyone can re-query it without trusting BlockCert AI itself.</p>
+          <p class="mb-0">Blockchain is the authoritative check — it answers "does this document match the record the issuer registered?"</p>
+        </div>
+
+        <div class="card">
+          <h2>Why AI helps</h2>
+          <p>Hash comparison proves a document was altered — but not always <em>how</em>, and not for documents that never had a record. AI reviews the document itself: font consistency, alignment, logo and signature regions, image manipulation, date and numbering anomalies, missing fields.</p>
+          <p class="mb-0">AI is a supporting signal only. A high AI risk score alone never brands a certificate fake; it flags the record for human review.</p>
+        </div>
+
+        <div class="card">
+          <h2>How verification works</h2>
+          <ol>
+            <li>Find the certificate record (by ID, uploaded hash or QR).</li>
+            <li>Read the authoritative on-chain record — not the database alone.</li>
+            <li>If a document was uploaded, compute its real SHA-256 and compare it with the chain record.</li>
+            <li>Check issuer approval and revocation status.</li>
+            <li>Run AI analysis when a document is available and AI is configured.</li>
+            <li>Produce the final result and store the verification event in real history.</li>
+          </ol>
+          <p class="mb-0">Looking up an ID or scanning a QR does not inspect a physical file — in that case the result only confirms that the record and blockchain registration exist.</p>
+        </div>
+
+        <div class="card">
+          <h2>Privacy principles</h2>
+          <ul>
+            <li>On-chain data is limited to: certificate fingerprint, issuer address, timestamp, revocation flag. <strong>No names, emails, documents or personal data ever go on-chain.</strong></li>
+            <li>Documents are stored server-side with generated filenames and are served only through authenticated, ownership-checked endpoints.</li>
+            <li>Public verification exposes only status, institution, certificate type, issue date, blockchain/hash status and verification timestamp.</li>
+            <li>Passwords are hashed with bcrypt; sessions use short-lived JWTs; secrets live only in environment variables.</li>
+            <li>QR codes embed only the public verification URL.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>What is on-chain vs off-chain</h2>
+          <div class="compare">
+            <div>
+              <span class="badge badge-ok"><span aria-hidden="true">⛓</span> On-chain</span>
+              <ul class="mt-1">
+                <li>SHA-256 document fingerprint</li>
+                <li>Issuer address</li>
+                <li>Registration timestamp</li>
+                <li>Revoked flag</li>
+              </ul>
+            </div>
+            <div>
+              <span class="badge badge-info"><span aria-hidden="true">▤</span> Off-chain</span>
+              <ul class="mt-1">
+                <li>Documents and student records</li>
+                <li>OCR extraction results</li>
+                <li>AI analyses and risk scores</li>
+                <li>Verification history and audit logs</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="trust-note mt-3">
+          <span aria-hidden="true">ⓘ</span>
+          <span>AI provides a document-risk assessment. Blockchain verification confirms whether the document matches the official issuer record. AI results are not absolute proof of authenticity.</span>
+        </div>
+
+        <div class="btn-row mt-3">
+          <a class="btn btn-primary" href="/verify.html">Verify a certificate</a>
+          <a class="btn btn-outline" href="/how-it-works.html">See the full flow</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/common.js"></script>
+</body>
+</html>

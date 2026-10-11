@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issue a Certificate — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main" class="dash">
+    <div class="dash-main">
+      <div class="alert" id="pageAlert" role="alert"></div>
+
+      <div class="dash-head">
+        <div>
+          <h1>Issue a certificate</h1>
+          <p>What can I do here? Upload a document, review the OCR-extracted fields, then register the fingerprint on the blockchain.</p>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn-outline" href="/institution-dashboard.html">Back to dashboard</a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Step 1 — Upload the document</h2></div>
+        <div class="panel-body">
+          <div class="upload-zone" id="docZone" tabindex="0" role="button" aria-label="Upload certificate document">
+            <span class="uz-icon" aria-hidden="true">⬆</span>
+            <strong>Drop the certificate here or click to browse</strong>
+            <p>PDF, PNG or JPG up to 10 MB.</p>
+            <p class="file-name" id="docName" hidden></p>
+          </div>
+          <input type="file" id="docInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/png,image/jpeg" hidden />
+          <div class="btn-row mt-2">
+            <button class="btn btn-primary" type="button" id="ocrBtn" disabled>Extract text with OCR</button>
+          </div>
+          <div class="loading-row" id="ocrBusy" hidden><span class="spinner" aria-hidden="true"></span> Extracting text…</div>
+          <div id="ocrResult" class="mt-2"></div>
+        </div>
+      </div>
+
+      <div class="panel mt-3" id="reviewPanel">
+        <div class="panel-head"><h2>Step 2 — Review and correct the fields</h2></div>
+        <div class="panel-body">
+          <div class="ocr-hint">OCR output is a suggestion only. <strong>Confirm or correct every field</strong> — nothing is auto-approved.</div>
+
+          <div class="ocr-split">
+            <div class="doc-preview">
+              <div id="docPreview"><p class="muted small">No document uploaded yet.</p></div>
+            </div>
+            <form id="issueForm">
+              <div class="form-grid">
+                <div class="field full">
+                  <label for="studentName">Student name</label>
+                  <input type="text" id="studentName" required minlength="2" maxlength="120" />
+                </div>
+                <div class="field">
+                  <label for="registrationNumber">Register number</label>
+                  <input type="text" id="registrationNumber" required maxlength="60" />
+                </div>
+                <div class="field">
+                  <label for="degree">Degree / programme</label>
+                  <input type="text" id="degree" required minlength="2" maxlength="160" />
+                </div>
+                <div class="field">
+                  <label for="department">Department</label>
+                  <input type="text" id="department" maxlength="160" />
+                </div>
+                <div class="field">
+                  <label for="certificateType">Certificate type</label>
+                  <select id="certificateType" required></select>
+                </div>
+                <div class="field">
+                  <label for="semester">Semester <span class="muted">(required for mark sheets)</span></label>
+                  <select id="semester">
+                  </select>
+                  <p class="small muted mb-0">Pick the semester this certificate belongs to (1–10). A student can have one certificate per semester for the same credential — so 2nd/3rd sem uploads for the same student are allowed.</p>
+                </div>
+                <div class="field">
+                  <label for="academicYear">Graduation / academic year</label>
+                  <input type="text" id="academicYear" maxlength="40" placeholder="2024-2025" />
+                </div>
+                <div class="field">
+                  <label for="marks">Marks / CGPA</label>
+                  <input type="text" id="marks" maxlength="60" />
+                </div>
+                <div class="field">
+                  <label for="studentEmail">Student login email <span class="muted">(required)</span></label>
+                  <input type="email" id="studentEmail" maxlength="200" placeholder="student@example.com" required />
+                  <p class="small muted mb-0">The student logs in with this email and the password below to view this certificate.</p>
+                </div>
+                <div class="field">
+                  <label for="studentPassword">Student login password <span class="muted">(required)</span></label>
+                  <input type="text" id="studentPassword" maxlength="128" autocomplete="off" placeholder="Min 8 chars, 1 letter + 1 digit" required />
+                  <p class="small muted mb-0">If the student already has an account (this email), only the email is needed. Otherwise an account is created with this password.</p>
+                </div>
+                <div class="field">
+                  <label for="issueDate">Issue date</label>
+                  <input type="date" id="issueDate" required />
+                </div>
+                <div class="field">
+                  <label for="expiryDate">Expiry date <span class="muted">(optional)</span></label>
+                  <input type="date" id="expiryDate" />
+                </div>
+              </div>
+
+              <h3>Step 3 — Register</h3>
+              <p class="small muted">SHA-256 is calculated from the real file, a unique ID is allocated, and the transaction is submitted to the blockchain.</p>
+
+              <ol class="progress-steps" id="issueSteps">
+                <li data-step="upload"><span class="ps-glyph" aria-hidden="true">○</span> Uploading document…</li>
+                <li data-step="ocr"><span class="ps-glyph" aria-hidden="true">○</span> Extracting text…</li>
+                <li data-step="hash"><span class="ps-glyph" aria-hidden="true">○</span> Calculating hash…</li>
+                <li data-step="chain"><span class="ps-glyph" aria-hidden="true">○</span> Registering on blockchain…</li>
+                <li data-step="confirm"><span class="ps-glyph" aria-hidden="true">○</span> Waiting for confirmation…</li>
+                <li data-step="done"><span class="ps-glyph" aria-hidden="true">○</span> Certificate registered</li>
+              </ol>
+
+              <button class="btn btn-primary mt-2" type="submit" id="issueBtn" disabled>Issue &amp; register on blockchain</button>
+            </form>
+          </div>
+
+          <div id="issueResult" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/issue.js"></script>
+</body>
+</html>

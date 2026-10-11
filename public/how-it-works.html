@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works — BlockCert AI</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/responsive.css" />
+  <style>
+    .anim-flow .step { opacity: 0.35; transform: translateX(-6px); transition: opacity .45s ease, transform .45s ease; }
+    .anim-flow .step.in { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+  <div id="partial-navbar"></div>
+  <main id="main">
+    <section class="section" style="padding-top:2.4rem">
+      <div class="container" style="max-width:860px">
+        <span class="eyebrow">End-to-end flow</span>
+        <h1>How BlockCert AI works</h1>
+        <p class="muted">Each step below performs a real operation — nothing is simulated. If a step's service is unavailable, the flow stops and says so honestly.</p>
+
+        <div class="steps anim-flow mt-3">
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Institution uploads the document</h3><p>The issuing institution signs in and uploads the original certificate (PDF/PNG/JPG). MIME type, extension and size are validated.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>OCR extracts the fields</h3><p>Tesseract.js (and pdf-parse for PDFs) read the real text. Suggestions appear in an editable review panel — a human confirms or corrects every value. Nothing is auto-approved.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Human review</h3><p>The operator checks student name, register number, credential, department, dates and marks against the document preview before issuing.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>SHA-256 fingerprint</h3><p>The actual file bytes are hashed with SHA-256. A single changed bit produces a completely different fingerprint.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Blockchain registration</h3><p>The server submits a real transaction to CertificateRegistry: fingerprint, issuer address, timestamp, revoked flag. Only the hash goes on-chain — no personal data.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>QR code generated</h3><p>A QR code embeds only the public verification URL (the certificate ID). Scanning opens the public verify page.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Student credential</h3><p>The student sees their own certificates and a shareable digital credential profile containing only public-safe fields.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Employer verification</h3><p>An employer verifies by certificate ID, document upload or QR scan — or bulk-verifies a CSV of IDs. Public verification needs no account.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Hash comparison</h3><p>The uploaded document's SHA-256 is compared against the on-chain record. A mismatch means the document was altered after issuance.</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>AI analysis</h3><p>When a document is provided and an AI provider is configured, the real AI returns a risk score with per-check findings. If AI is not configured, the result says "AI analysis is currently unavailable."</p></div></div>
+          <div class="step"><span class="num" aria-hidden="true"></span><div><h3>Final result</h3><p>Verified · Suspicious · Tampered · Revoked · Not Found — decided by blockchain state first, AI as a supporting signal, and written to real verification history.</p></div></div>
+        </div>
+
+        <div class="trust-note mt-3">
+          <span aria-hidden="true">ⓘ</span>
+          <span>AI provides a document-risk assessment. Blockchain verification confirms whether the document matches the official issuer record. AI results are not absolute proof of authenticity.</span>
+        </div>
+
+        <div class="btn-row mt-3">
+          <a class="btn btn-primary" href="/verify.html">Verify a certificate now</a>
+          <a class="btn btn-outline" href="/about.html">Read about privacy &amp; architecture</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="partial-footer"></div>
+
+  <script src="/js/main.js"></script>
+  <script src="/js/common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var steps = document.querySelectorAll('.anim-flow .step');
+      if (!('IntersectionObserver' in window)) {
+        steps.forEach(function (s) { s.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.3 });
+      steps.forEach(function (s) { io.observe(s); });
+    });
+  </script>
+</body>
+</html>
