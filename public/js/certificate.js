@@ -153,8 +153,19 @@
           return r.blob();
         })
         .then((blob) => {
+          // The upload validator requires a real extension (.pdf/.png/.jpg).
+          // Derive it from the stored filename, falling back to the blob's
+          // content-type, so the re-upload is always accepted.
+          const extMatch = String(c.documentFilename || '').match(/\.[A-Za-z0-9]+$/);
+          const ext = extMatch
+            ? extMatch[0].toLowerCase()
+            : blob.type === 'image/png'
+              ? '.png'
+              : blob.type === 'image/jpeg'
+                ? '.jpg'
+                : '.pdf';
           const fd = new FormData();
-          fd.append('document', blob, 'document');
+          fd.append('document', blob, 'document' + ext);
           fd.append('certificateId', c.certificateId);
           return B.api('/api/ai/analyze', { method: 'POST', body: fd });
         })

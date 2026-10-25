@@ -123,6 +123,27 @@ async function issueCertificate({
       );
       if (byEmail.rows[0]) {
         studentUserId = byEmail.rows[0].id;
+      } else if (fields.registrationNumber) {
+        // A student may have self-registered with this registration number
+        // under a different email BEFORE the certificate was issued. Link to
+        // that account instead of crashing on the registration_number unique
+        // constraint (same real linkage rule as auth register: exact
+        // registration-number match).
+        const byReg = await client.query(
+          "SELECT id FROM users WHERE LOWER(role) = 'student' AND LOWER(registration_number) = LOWER($1) LIMIT 1",
+          [fields.registrationNumber]
+        );
+        if (byReg.rows[0]) {
+          studentUserId = byReg.rows[0].id;
+        } else if (fields.studentPassword) {
+          const passwordHash = await bcrypt.hash(fields.studentPassword, 12);
+          const created = await client.query(
+            `INSERT INTO users (name, email, password_hash, role, registration_number)
+             VALUES ($1, $2, $3, 'STUDENT', $4) RETURNING id`,
+            [fields.studentName, fields.studentEmail.toLowerCase(), passwordHash, fields.registrationNumber || null]
+          );
+          studentUserId = created.rows[0].id;
+        }
       } else if (fields.studentPassword) {
         const passwordHash = await bcrypt.hash(fields.studentPassword, 12);
         const created = await client.query(

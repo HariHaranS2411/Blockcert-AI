@@ -1,0 +1,24 @@
+name: Keep the hosted app warm
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${{ secrets.APP_URL || 'https://blockcert-ai.onrender.com' }}/api/health")
+          echo "health status: $code"
+          if [ "$code" != "200" ]; then
+            sleep 20
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "${{ secrets.APP_URL || 'https://blockcert-ai.onrender.com' }}/api/health")
+            echo "retry status: $code"
+          fi

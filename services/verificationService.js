@@ -18,6 +18,7 @@ const fs = require('fs');
 const { query, withTransaction } = require('../config/database');
 const hashService = require('./hashService');
 const blockchainService = require('./blockchainService');
+const duplicateService = require('./duplicateService');
 const aiService = require('./aiService');
 const ocrService = require('./ocrService');
 const { resolveStoredPath, fileExists } = require('../utils/fileUtils');
@@ -142,12 +143,40 @@ async function runAIAnalysis({ certRow, filePath, mimetype, certificateId, persi
   }
 
   try {
+    // Deterministic platform first: does this upload reproduce a certificate
+    // already registered here (byte-exact or content match)? A copy of an
+    // issued document reads identical to an original, so the text-only model
+    // cannot see the duplication - but the platform can. Official-record
+    // differences are surfaced in the Duplicate status check, never as
+    // tampering evidence to the model (record-vs-print mismatches here are
+    // issuance-era typing artifacts, and the model scores any mismatch 95+).
+    let duplicate = null;
+    try {
+      duplicate = await duplicateService.detectDuplicate({
+        filePath,
+        mimetype,
+        text: ocr.text,
+        fields: ocr.fields,
+        certificateId,
+      });
+    } catch (dupErr) {
+      duplicate = null; // never fabricate a duplicate verdict
+    }
+
     const result = await aiService.analyzeDocument({
       ocrText: ocr.text,
       filePath,
       mimetype,
       certificateId: certificateId || (certRow && certRow.certificate_id),
     });
+    const duplicateCheck = duplicateService.buildDuplicateCheck(duplicate, certificateId || (certRow && certRow.certificate_id));
+    if (duplicateCheck) result.checks.unshift(duplicateCheck);
+
+    // Same deterministic headline verdict as POST /api/ai/analyze (see
+    // duplicateService.applyDuplicateVerdict): verified duplicate keeps the
+    // authentic-level tamper score, a copy whose fields differ from the
+    // official record is raised into the Suspicious band by the platform.
+    duplicateService.applyDuplicateVerdict(result, duplicate, certificateId || (certRow && certRow.certificate_id));
 
     if (persistForId) {
       await query(
@@ -187,14 +216,15 @@ async function runAIAnalysis({ certRow, filePath, mimetype, certificateId, persi
             certRow ? certRow.document_path : null,
             process.env.AI_MODEL || 'unknown',
             process.env.AI_API_KEY ? 'provider-error' : 'not-configured',
-            err.message || 'AI analysis is currently unavailable.',
+            [err.message, err.detail].filter(Boolean).join(' — '),
           ]
         );
       } catch (_) {
         /* history write must not break the verification response */
       }
     }
-    return { available: false, performed: false, message: 'AI analysis is currently unavailable.' };
+    const reasonText = [err.message, err.detail].filter(Boolean).join(' — ');
+    return { available: false, performed: false, message: reasonText || 'AI analysis is currently unavailable.' };
   }
 }
 

@@ -7,6 +7,7 @@ const aiService = require('../services/aiService');
 const ocrService = require('../services/ocrService');
 const { deleteStoredFile } = require('../utils/fileUtils');
 const certService = require('../services/certificateService');
+const duplicateService = require('../services/duplicateService');
 
 /**
  * POST /api/ai/analyze - run a real AI analysis on an uploaded document.
@@ -34,7 +35,11 @@ async function analyze(req, res, next) {
         deleteStoredFile(path.basename(filePath));
         return res.status(404).json({ success: false, message: 'Certificate Not Found.' });
       }
-      if (req.user.role !== 'ADMIN' && Number(certRow.institution_id) !== Number(req.user.institutionId)) {
+      const isAllowed =
+        req.user.role === 'ADMIN' ||
+        (req.user.role === 'INSTITUTION' && Number(certRow.institution_id) === Number(req.user.institutionId)) ||
+        (req.user.role === 'STUDENT' && Number(certRow.student_id) === Number(req.user.id));
+      if (!isAllowed) {
         deleteStoredFile(path.basename(filePath));
         return res.status(403).json({ success: false, message: 'You do not have permission to analyze this certificate.' });
       }
@@ -70,12 +75,44 @@ async function analyze(req, res, next) {
     }
 
     try {
+      // Deterministic platform check FIRST: does the upload reproduce a
+      // certificate already registered here? A copy of an issued document
+      // reads identical to the original, so the text-only model cannot see
+      // the duplication - but the platform can (hash / content match).
+      let duplicate = null;
+      try {
+        duplicate = await duplicateService.detectDuplicate({
+          filePath,
+          mimetype: req.file.mimetype,
+          text: ocr.text,
+          fields: ocr.fields,
+          certificateId,
+        });
+      } catch (dupErr) {
+        duplicate = null; // never fabricate a duplicate verdict
+      }
+      // NOTE: official-record differences are NOT passed to the model as
+      // tampering evidence (measured 2026-10-22, test/duplicate-evidence-test):
+      // the model scores ANY record mismatch 95/Tampered, but on this platform
+      // record-vs-print mismatches are issuance-era typing artifacts, not
+      // fraud. They stay in the deterministic 'Duplicate status' check.
+
       const result = await aiService.analyzeDocument({
         ocrText: ocr.text,
         filePath,
         mimetype: req.file.mimetype,
         certificateId,
       });
+      const duplicateCheck = duplicateService.buildDuplicateCheck(duplicate, certificateId);
+      if (duplicateCheck) result.checks.unshift(duplicateCheck);
+
+      // Deterministic headline verdict for a recognized duplicate of a
+      // registered certificate: a copy that matches the official record is
+      // labeled a verified duplicate (authentic-level score kept) while a
+      // copy whose printed fields disagree with the record is raised into
+      // the Suspicious band by the platform itself - the model never sees
+      // the official record, so this cannot come from it.
+      const duplicateVerdict = duplicateService.applyDuplicateVerdict(result, duplicate, certificateId);
 
       let persistedId = null;
       if (certRow) {
@@ -96,20 +133,33 @@ async function analyze(req, res, next) {
         await certService.auditLog(req.user.id, 'ai.analyzed', 'certificate', certRow.certificate_id, {
           riskScore: result.riskScore,
           classification: result.classification,
+          duplicateVerdict: duplicateVerdict ? duplicateVerdict.verdict : null,
         });
       }
 
       deleteStoredFile(path.basename(filePath));
 
+      const duplicateMessage = duplicateMessageFor(duplicate, duplicateVerdict, certificateId, result.classification);
       return res.json({
         success: true,
-        message: `AI analysis complete: risk score ${result.riskScore}/100 (${result.classification}).`,
+        message: `AI analysis complete: risk score ${result.riskScore}/100 (${result.classification}) — authenticity ${100 - result.riskScore}/100.${duplicateMessage ? ' ' + duplicateMessage : ''}`,
         data: {
           analysisStatus: 'completed',
           analysisId: persistedId,
           riskScore: result.riskScore,
           classification: result.classification,
           band: aiService.classifyScore(result.riskScore),
+          authenticityPercent: 100 - result.riskScore,
+          duplicateVerdict,
+          duplicate: duplicate && duplicate.reference
+            ? {
+                level: duplicate.level,
+                certificateId: duplicate.reference.certificateId,
+                differencesCount: duplicate.differences.length,
+                differences: duplicate.differences.slice(0, 6),
+                verdict: duplicateVerdict ? duplicateVerdict.verdict : null,
+              }
+            : null,
           checks: result.checks,
           findings: result.findings,
           provider: result.provider,
@@ -159,7 +209,8 @@ async function getAnalyses(req, res, next) {
     const isPrivileged =
       req.user.role === 'ADMIN' ||
       (req.user.role === 'INSTITUTION' && Number(req.user.institutionId) === Number(certRow.institution_id)) ||
-      (req.user.role === 'EMPLOYER');
+      (req.user.role === 'EMPLOYER') ||
+      (req.user.role === 'STUDENT' && Number(certRow.student_id) === Number(req.user.id));
     if (!isPrivileged) {
       return res.status(403).json({ success: false, message: 'You do not have permission to view AI analyses for this certificate.' });
     }
@@ -284,6 +335,33 @@ async function resumeSummary(req, res, next) {
   } catch (err) {
     return next(err);
   }
+}
+
+/** One-line duplicate verdict appended to the analysis message. */
+function duplicateMessageFor(duplicate, verdict, requestedCertificateId, classification) {
+  if (!duplicate || !duplicate.reference) return '';
+  const ref = duplicate.reference.certificateId;
+  const reqId = requestedCertificateId ? String(requestedCertificateId).trim().toUpperCase() : null;
+  const notThatCert = reqId && reqId !== ref ? ` The document belongs to certificate ${ref}, not the requested ${reqId}.` : '';
+
+  if (duplicate.level === 'byte-exact') {
+    return `Verified duplicate: byte-identical to the official document registered for certificate ${ref} — identical content, not altered.${notThatCert}`;
+  }
+  if (!duplicate.differences.length) {
+    return `Verified duplicate: this upload is a copy/re-scan of the official document registered for certificate ${ref} (different bytes, identical content).${notThatCert}`;
+  }
+  if (duplicate.differences.length) {
+    const wrongDoc = reqId && reqId !== ref ? `This upload reproduces certificate ${ref}, not the requested ${reqId},` : `This upload is a copy of certificate ${ref},`;
+    let raisedNote = '';
+    if (verdict && verdict.elevatedRisk) {
+      raisedNote =
+        classification === 'Suspicious'
+          ? ' The assessment was raised to Suspicious because it differs from the official record.'
+          : ` The record mismatch adds to an independent ${classification} assessment of the document itself.`;
+    }
+    return `Suspicious copy: ${wrongDoc} and ${duplicate.differences.length} field(s) differ from the official record.${raisedNote}`;
+  }
+  return '';
 }
 
 module.exports = { analyze, getAnalyses, resumeSummary };

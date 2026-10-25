@@ -1,0 +1,1 @@
+REGISTER linked=1 | student sees: ["CERT-2026-000004"] stats={"total":1,"active":1,"revoked":0}

@@ -1,0 +1,212 @@
+
+=== 1. Fresh install must show real zeros ===
+  PASS  health endpoint responds
+  PASS  database connected
+  PASS  public counts endpoint
+  PASS  Certificates 0
+  PASS  Institutions 0
+  PASS  Verifications 0
+
+=== 2. Honest AI unavailable state (no key configured) ===
+  PASS  AI reported as not configured
+
+=== 3. Public verification of unknown ID ===
+  PASS  unknown ID returns 200 with result
+  PASS  unknown ID → NOT_FOUND
+  PASS  honest not-found message
+
+=== 4. Register institution + employer + student ===
+  PASS  institution registered
+  PASS  institution token issued
+  PASS  role is INSTITUTION
+  PASS  institution created with the account
+  PASS  employer registered
+  PASS  student registered with registration number
+  PASS  wrong password rejected
+
+=== 4b. Forgot password reports the real (unconfigured) state ===
+  PASS  forgot-password returns honest 503 when no email service exists
+  PASS  honest forgot-password message
+  PASS  emailDeliveryConfigured reported false
+  PASS  response does not reveal whether the account exists
+  PASS  identical response for unknown account (no enumeration)
+
+=== 5. Unauthorized access is blocked ===
+  PASS  certificate list requires auth
+  PASS  student cannot list all certificates
+  PASS  institution cannot access admin API
+  PASS  POST /api/institutions requires auth
+
+=== 6. Admin setup script creates the only admin ===
+  PASS  admin created via explicit setup script
+  PASS  admin login works
+
+=== 7. Institution must be approved before issuer is verified ===
+  PASS  admin lists institutions
+  PASS  new institution is PENDING
+  PASS  admin approves institution
+  PASS  institution now APPROVED
+
+=== 8. Issue a real certificate on-chain ===
+  PASS  certificate issued
+  PASS  certificate returned
+  PASS  certificate ID format CERT-YYYY-XXXXXX
+  PASS  stored SHA-256 matches the real file
+  PASS  registered on-chain
+  PASS  real tx hash stored
+  PASS  real block number stored
+  PASS  certificate ACTIVE
+  PASS  QR code generated
+
+=== 9. Verify by ID (record + blockchain, no document claim) ===
+  PASS  id verification runs
+  PASS  ID verification → VERIFIED
+  PASS  does not claim document was checked
+  PASS  blockchain record found
+  PASS  issuer verified (approved institution)
+  PASS  AI not performed without a document
+
+=== 10. Verify by original upload → match ===
+  PASS  upload verification runs
+  PASS  original upload → VERIFIED
+  PASS  SHA-256 MATCH reported
+  PASS  AI marked unavailable (no key), no fake score
+  PASS  no fabricated risk score present
+
+=== 11. Modify the PDF → real hash mismatch ===
+  PASS  modified file produces a different SHA-256
+  PASS  tampered upload verification runs
+  PASS  modified upload → TAMPERED
+  PASS  SHA-256 MISMATCH reported
+  PASS  chain record still found for comparison
+
+=== 12. QR verification (public URL only) ===
+  PASS  QR PNG served
+  PASS  QR verification → VERIFIED
+  PASS  foreign QR content rejected
+
+=== 13. Revoke on-chain → REVOKED ===
+  PASS  revocation accepted
+  PASS  real revocation tx hash
+  PASS  verification → REVOKED
+  PASS  revocation flagged
+  PASS  real revocation reason shown
+  PASS  record retained as REVOKED (not deleted)
+  PASS  revocation history row kept
+
+=== 14. Cross-tenant ownership enforcement ===
+  PASS  other institution cannot view this certificate
+  PASS  other institution cannot revoke this certificate
+
+=== 15. Student sees only their own certificates ===
+  PASS  student list works
+  PASS  certificate linked to the student via registration number
+  PASS  linked certificate is the issued one
+  PASS  student sees the real REVOKED status
+  PASS  public credential profile reachable without login
+  PASS  public profile lists the real credential
+  PASS  profile has no private fields
+
+=== 16. Verification history & audit are real ===
+  PASS  institution sees history
+  PASS  several real verification events recorded
+  PASS  summary counts real results
+  PASS  audit logs accessible to admin
+  PASS  issuance audited
+  PASS  revocation audited
+  PASS  registration audited
+
+=== 17. Employer bulk verification (CSV) ===
+  PASS  bulk verification runs
+  PASS  bulk reports REVOKED row
+  PASS  bulk reports NOT_FOUND row
+  PASS  per-row real results
+  PASS  employer history endpoint
+  PASS  CSV template served
+  PASS  POST /api/employer/bulk-verify works
+  PASS  employer bulk reports the real REVOKED row
+  PASS  employer bulk requires auth
+
+=== 18. Admin dashboard real counts ===
+  PASS  admin dashboard loads
+  PASS  user count is real
+  PASS  institution count is real
+  PASS  certificate count is real
+  PASS  revoked count real
+  PASS  verification count real
+  PASS  audit log count real
+  PASS  blockchain health reported
+
+=== 19. AI endpoints honest when unconfigured ===
+  PASS  AI analyze returns 503 when no key
+  PASS  honest AI unavailable message
+  PASS  no fabricated risk score in unavailable response
+  PASS  AI history endpoint works
+  PASS  analyses array present
+
+=== 20. OCR extraction on real PDF ===
+  PASS  OCR extract succeeds on real PDF
+  PASS  real text extracted from PDF
+
+=== 21. Duplicate document hash rejected ===
+  PASS  duplicate document hash rejected with 409
+
+=== 22. Second issuance (fresh doc) + student linkage via hash ===
+  PASS  second certificate issued
+  PASS  unique certificate ID allocated
+  PASS  second cert registered on-chain
+
+=== 24. Bulk issuance with attached documents + template + retroactive student linkage ===
+  PASS  bulk CSV template served
+  PASS  bulk template has the required header row only (no fake rows)
+  PASS  CSP allows document previews (frame-src declared)
+  PASS  CSP frame-src permits blob: PDF previews
+  PASS  bulk issuance processes CSV with attached documents
+  PASS  per-row real results: 1 issued, 1 failed
+  PASS  attached-document row registered on-chain
+  PASS  missing document row fails with actionable documentPath error
+  PASS  student registration after bulk issuance succeeds
+  PASS  student certificate endpoint works
+  PASS  retroactively linked bulk-issued certificate visible to the student
+
+=== 23. Frontend pages served ===
+  PASS  page 200: /
+  PASS  page 200: /index.html
+  PASS  page 200: /login.html
+  PASS  page 200: /signup.html
+  PASS  page 200: /forgot-password.html
+  PASS  page 200: /verify.html
+  PASS  page 200: /how-it-works.html
+  PASS  page 200: /about.html
+  PASS  page 200: /issue-certificate.html
+  PASS  page 200: /student-dashboard.html
+  PASS  page 200: /institution-dashboard.html
+  PASS  page 200: /employer-dashboard.html
+  PASS  page 200: /admin-dashboard.html
+  PASS  page 200: /certificate-details.html
+  PASS  page 200: /verification-result.html
+  PASS  page 200: /ai-analysis.html
+  PASS  page 200: /credential-profile.html
+  PASS  page 200: /verification-history.html
+  PASS  style.css served
+  PASS  vendored qr-scanner library served
+  PASS  js 200: main.js
+  PASS  js 200: auth.js
+  PASS  js 200: verify.js
+  PASS  js 200: issue.js
+  PASS  js 200: student.js
+  PASS  js 200: institution.js
+  PASS  js 200: employer.js
+  PASS  js 200: admin.js
+  PASS  js 200: ai-analysis.js
+  PASS  js 200: certificate.js
+  PASS  js 200: profile.js
+  PASS  js 200: history.js
+  PASS  js 200: dashboard.js
+  PASS  js 200: common.js
+  PASS  js 200: result.js
+  PASS  js 200: qr.js
+
+========================================
+PASSED: 158   FAILED: 0
+========================================

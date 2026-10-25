@@ -1,0 +1,6 @@
+registrar1791397493225@example.edu | INSTITUTION
+hr1791397493225@corp.example | EMPLOYER
+student1791397493225@mail.example | STUDENT
+admin1791397493225@blockcert.local | ADMIN
+other1791397493225@example.edu | INSTITUTION
+late-student1791397493225@mail.example | STUDENT

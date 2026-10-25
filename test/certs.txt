@@ -1,0 +1,3 @@
+CERT-2026-000001 | Student One | REG-2026-001 | sid=3 | registered
+CERT-2026-000002 | Student One | REG-2026-001 | sid=3 | registered
+CERT-2026-000003 | Bulk Row Student | BULK-REG-1791398422536 | sid=6 | registered

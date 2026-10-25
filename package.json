@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "start": "node server.js",
+    "start:cloud": "node scripts/cloud-boot.js",
     "dev": "node --watch server.js",
     "chain": "ganache --wallet.totalAccounts 10 --chain.chainId 1337 --server.port 7545",
     "contract:deploy": "node scripts/deploy-contract.js",
@@ -13,6 +14,7 @@
     "setup:admin": "node scripts/create-admin.js"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^1.0.13",
     "@tesseract.js-data/eng": "^1.0.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -21,20 +23,21 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "express-validator": "^7.2.1",
+    "ganache": "^7.9.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
-    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.10.38",
     "pdfkit": "^0.17.2",
     "pg": "^8.16.3",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.4",
+    "sharp": "^0.35.5",
+    "solc": "^0.8.30",
     "tesseract.js": "^5.1.1"
   },
   "devDependencies": {
-    "embedded-postgres": "^17.10.0-beta.17",
-    "ganache": "^7.9.2",
-    "solc": "^0.8.30"
+    "embedded-postgres": "^17.10.0-beta.17"
   },
   "engines": {
     "node": ">=20"

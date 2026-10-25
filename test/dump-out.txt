@@ -1,0 +1,43 @@
+◇ injected env (11) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+[+0.6s] extracting C:\Users\rgbbs\Downloads\blockcert ai\uploads\1792856527843-32188a782766e4b91b7a023c1022d4f1.png image/png
+Detected 108 diacritics
+Detected 98 diacritics
+[+16.2s] extractFields done in 15.6s, status=completed
+=== FIELDS ===
+{
+  "department": "Computer Science",
+  "studentName": "E CANDIDATE",
+  "institution": "ANNA UNIVERSITY"
+}
+=== TEXT (618 chars) ===
+TRL EC FC, ais
+
+ANNA CHENNAI - 25
+wc. DEGREE EXAMINATIONS
+€ GRADE SHEET
+
+AAA Be
+
+[reer] S| No: MA 543859
+
+NAME OF THE 7
+] CANDIDATE POORNIMA DEVI M -
+MONTH & YEAR OF 7%
+owe cram | ceER |] ma,
+| COLLEGE OF
+BI STUDY
+= PROGRAMME &
+2 BRANCH
+2 SEM COURSE
+al Wo | CODE
+
+£ 02 cPTan 2
+coe CP720 Theoretical Foundations of Computer Science 4
+£ oR CP7202 | Advanced Databases 3
+Co CP7203 Principles of Programing Languages 3
+02 CP7204 Advanced Operating Systems 3
+02 IFra0e Cloud Computing 3
+oR NE7202 Network and Information Security 3
+a2 CP7212 | Case Study - Operating Systems Design (Team Work) 1
+
+** “End of Statement * * *
