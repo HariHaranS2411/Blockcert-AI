@@ -1,5 +1,6 @@
 node_modules/
 .env
+.hosted-db-url
 uploads/*
 !uploads/.gitkeep
 *.log
