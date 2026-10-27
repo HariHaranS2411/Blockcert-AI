@@ -118,11 +118,112 @@ async function bootstrapAdmin() {
   console.log(`[cloud-boot] admin bootstrap: ${email} (id ${inserted.rows[0].id})`);
 }
 
+/**
+ * Re-align persisted chain state with THIS boot's fresh chain (the container
+ * has no persistent chain, same situation scripts/resync-chain.js documents
+ * for the local Ganache):
+ *   1. institution wallet addresses -> this boot's issuer key, so issuer
+ *      checks keep matching;
+ *   2. re-register every certificate whose on-chain record is missing and
+ *      re-apply revocations — scripts/resync-chain.js --apply, the same
+ *      recovery issuance uses; conflicting fingerprints are reported and
+ *      never silently adopted.
+ */
+async function bootstrapChainState() {
+  const { initBlockchain, isBlockchainConfigured, getUnavailableReason } = require('../config/blockchain');
+  initBlockchain();
+  if (!isBlockchainConfigured()) {
+    throw new Error('Blockchain failed to initialise after deployment: ' + getUnavailableReason());
+  }
+
+  const { initDatabase, query, isDatabaseConfigured } = require('../config/database');
+  initDatabase();
+  if (!isDatabaseConfigured()) return;
+
+  const issuerAddress = new ethers.Wallet(process.env.BLOCKCHAIN_PRIVATE_KEY).address.toLowerCase();
+  const realigned = await query(
+    `UPDATE institutions
+        SET wallet_address = $1, updated_at = NOW()
+      WHERE wallet_address IS NOT NULL AND LOWER(wallet_address) <> $1
+      RETURNING id`,
+    [issuerAddress]
+  );
+  console.log(`[cloud-boot] institution wallet realignment: ${realigned.rowCount} row(s) updated`);
+  if (realigned.rowCount > 0) {
+    await query(
+      `INSERT INTO audit_logs (actor_id, action, entity, details) VALUES (NULL,'blockchain.wallet_realigned','institution',$1)`,
+      [JSON.stringify({ updated: realigned.rowCount, issuer: issuerAddress })]
+    ).catch(() => {});
+  }
+
+  // Re-register every certificate whose on-chain record is missing and
+  // re-apply revocations — same recovery scripts/resync-chain.js --apply
+  // performs (in-process here: a separate child process hangs at its first
+  // RPC call while this boot's provider is the only reliable one).
+  const blockchainService = require('../services/blockchainService');
+  const certService = require('../services/certificateService');
+  const certs = await query(
+    `SELECT id, certificate_id, status, document_hash, blockchain_status, blockchain_tx_hash, block_number
+       FROM certificates ORDER BY id`
+  );
+  let issued = 0, revokedAgain = 0, conflicts = 0, errors = 0;
+  for (const cert of certs.rows) {
+    let record = null;
+    try {
+      record = await blockchainService.getCertificateRecord(cert.certificate_id);
+    } catch (err) {
+      console.error('[cloud-boot] chain read failed for ' + cert.certificate_id + ': ' + err.message);
+      errors += 1;
+      continue;
+    }
+    if (record) {
+      const chainHash = String(record.certificateHash || '').toLowerCase();
+      const dbHash = String(cert.document_hash || '').toLowerCase();
+      if (dbHash && chainHash && chainHash !== dbHash) {
+        console.error('[cloud-boot] fingerprint conflict for ' + cert.certificate_id + ' - left untouched');
+        conflicts += 1;
+        continue;
+      }
+      if (cert.status === 'REVOKED' && !record.revoked) {
+        try {
+          const r = await blockchainService.revokeCertificate(cert.certificate_id);
+          await query('UPDATE revocations SET blockchain_tx_hash = $2 WHERE certificate_id = $1', [cert.id, r.txHash]);
+          revokedAgain += 1;
+        } catch (err) {
+          console.error('[cloud-boot] revoke failed for ' + cert.certificate_id + ': ' + err.message);
+          errors += 1;
+        }
+      }
+      continue;
+    }
+    if (!cert.document_hash) continue;
+    try {
+      const res = await certService.registerOnBlockchain(cert);
+      if (res.ok) {
+        issued += 1;
+        if (cert.status === 'REVOKED') {
+          const r = await blockchainService.revokeCertificate(cert.certificate_id);
+          await query('UPDATE revocations SET blockchain_tx_hash = $2 WHERE certificate_id = $1', [cert.id, r.txHash]);
+          revokedAgain += 1;
+        }
+      } else {
+        console.error('[cloud-boot] register failed for ' + cert.certificate_id + ': ' + (res.reason || 'unknown'));
+        errors += 1;
+      }
+    } catch (err) {
+      console.error('[cloud-boot] register failed for ' + cert.certificate_id + ': ' + err.message);
+      errors += 1;
+    }
+  }
+  console.log(`[cloud-boot] chain resync: re-registered ${issued}, re-revoked ${revokedAgain}, conflicts ${conflicts}, errors ${errors}`);
+}
+
 async function main() {
   await startGanache();
   await deployContract();
   await applyMigrations();
   await bootstrapAdmin().catch((err) => console.error('[cloud-boot] admin bootstrap failed:', err.message));
+  await bootstrapChainState().catch((err) => console.error('[cloud-boot] chain state bootstrap failed:', err.message));
 
   const { start } = require('../server');
   await start();

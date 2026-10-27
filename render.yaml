@@ -1,11 +1,8 @@
 services:
   - type: web
     name: blockcert-ai-hari2411
-    runtime: node
+    runtime: docker
     plan: free
-    buildCommand: npm ci
-    # Base the machine on the deploy context so subshells keep working on Linux
-    startCommand: npm run db:migrate && (node scripts/create-admin.js || true) && npm start
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
@@ -14,12 +11,11 @@ services:
         generateValue: true
       - key: BASE_URL
         value: https://blockcert-ai-hari2411.onrender.com
-      - key: BLOCKCHAIN_RPC_URL
-        sync: false        # optional: leave blank; app runs with blockchain_status=not_configured
-      - key: BLOCKCHAIN_PRIVATE_KEY
-        sync: false
-      - key: CONTRACT_ADDRESS
-        sync: false
+      # The chain is ephemeral by design: scripts/cloud-boot.js starts an
+      # in-process Ganache, deploys CertificateRegistry and re-registers the
+      # certificates from the database on EVERY boot — no manual keys needed.
+      # BLOCKCHAIN_RPC_URL / BLOCKCHAIN_PRIVATE_KEY / CONTRACT_ADDRESS set in
+      # the dashboard would be overwritten at boot anyway.
       - key: AI_API_KEY
         sync: false        # Gemini/OpenAI-compatible key, set in the dashboard
       - key: AI_API_BASE
@@ -39,9 +35,6 @@ services:
       - key: MAX_UPLOAD_MB
         value: "10"
 
-databases:
-  - name: blockcert-ai-db
-    databaseName: blockcert
-    user: blockcert
-    plan: free
-    postgresMajorVersion: "16"
+# Persistent database is EXTERNAL (Neon, DATABASE_URL env) — not a Render DB,
+# so the data (users, certificates, verifications) outlives any free-plan
+# database expiry.
