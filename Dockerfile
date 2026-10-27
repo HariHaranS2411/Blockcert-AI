@@ -5,7 +5,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+# The ganache/chokidar dependency chain has native modules (bcrypt, keccak,
+# secp256k1, leveldown, bufferutil, utf-8-validate). They normally install from
+# bundled prebuilt binaries; the toolchain is here so a missing prebuild still
+# compiles, and it is purged in the same layer so it never reaches the image.
+# npm install is the fallback: unlike npm ci it reconciles platform-specific
+# lockfile entries instead of failing the build on a stray one.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
+    && (npm ci --omit=dev --no-audit --no-fund || npm install --omit=dev --no-audit --no-fund) \
+    && npm cache clean --force \
+    && apt-get purge -y --auto-remove python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY contracts ./contracts
 COPY database ./database

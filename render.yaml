@@ -9,8 +9,11 @@ services:
         sync: false        # cloud Postgres (Neon) connection string, set in the dashboard
       - key: JWT_SECRET
         generateValue: true
+      # The live service URL. Render appended '-wbun' because the plain name was
+      # still reserved, so the deployed URL (and therefore every QR code the app
+      # generates) uses the suffixed host.
       - key: BASE_URL
-        value: https://blockcert-ai-hari2411.onrender.com
+        value: https://blockcert-ai-hari2411-wbun.onrender.com
       # The chain is ephemeral by design: scripts/cloud-boot.js starts an
       # in-process Ganache, deploys CertificateRegistry and re-registers the
       # certificates from the database on EVERY boot — no manual keys needed.

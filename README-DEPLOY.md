@@ -36,11 +36,12 @@ as `DATABASE_URL`. See <https://render.com/docs/free>.
 1. Sign in at <https://render.com> → **New → Blueprint** → pick
    `HariHaranS2411/Blockcert-AI` (branch `main`) → **Apply**.
 2. **Keep the service name `blockcert-ai-hari2411`.** `render.yaml` sets
-   `BASE_URL=https://blockcert-ai-hari2411.onrender.com`, and QR codes printed on
-   already-issued certificates point at that exact URL — reusing the name keeps
-   every existing QR valid. If the name is taken and Render assigns a different
-   one, edit `BASE_URL` in `render.yaml` to `https://<the-name-onrender.com>` and
-   re-apply before the first build finishes.
+   `BASE_URL=https://blockcert-ai-hari2411-wbun.onrender.com` — the live URL of
+   the running service (Render appends a suffix when the plain slug is already
+   reserved, as happened on the first deploy). QR codes are built from `BASE_URL`,
+   so if Render gives your service a different host, update `BASE_URL` (in
+   `render.yaml` and in the service's Environment) to that host before issuing
+   anything.
 3. Fill the values the blueprint marks `sync: false` (if the service already
 exists from an earlier attempt, a blueprint apply does **not** re-ask for values
 it already has — open **Environment** on the service and set/clear them there):
@@ -101,7 +102,7 @@ hosted app.
 
 `.github/workflows/keep-alive.yml` pings `/api/health` every 10 minutes, which
 stops the free service from falling asleep. It targets
-`https://blockcert-ai-hari2411.onrender.com` by default; set a repository secret
+`https://blockcert-ai-hari2411-wbun.onrender.com` by default; set a repository secret
 named `APP_URL` if your URL differs.
 
 ## Free-tier facts (checked against the providers' docs)
