@@ -58,7 +58,11 @@ async function startGanache() {
     wallet: { totalAccounts: 10 },
     logging: { quiet: true },
   });
-  await server.listen(CHAIN_PORT);
+  // Bind the chain to loopback ONLY. Hosted platforms probe for open ports to
+  // find the app's primary port, and an all-interfaces 7545 made Render treat
+  // the chain as the service port ("New primary port detected: 7545") and keep
+  // restarting the deploy. Loopback is also the only interface that needs it.
+  await server.listen(CHAIN_PORT, '127.0.0.1');
   const accounts = server.provider.getInitialAccounts();
   const [issuer] = Object.values(accounts);
   // The app's issuer wallet is the funded account #0 (has pre-funded ETH).
