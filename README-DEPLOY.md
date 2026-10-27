@@ -9,6 +9,39 @@ survive redeploys — and the public URL keeps working with your laptop off.
 Repository: `github.com/HariHaranS2411/Blockcert-AI`, branch `main`.
 Render reads `render.yaml` from that branch and builds `Dockerfile`.
 
+## As built: the running service (2026-10-27)
+
+**Live URL: <https://blockcert-ai-hari2411-wbun.onrender.com>** — Render appends a
+suffix when the plain slug is already reserved, which is what happened here, so
+`BASE_URL` names the suffixed host (that is the URL the app puts in QR codes).
+
+- The service (`web_service`, docker, free plan, region oregon, health check
+  `/api/health`, auto-deploy on `main`) was created through the **Render API**,
+  not the dashboard, in workspace `My Workspace`.
+- `DATABASE_URL` points at Neon; the boot log confirms `[startup] Database connected.`
+  and `[cloud-boot] chain resync: re-registered 26, re-revoked 2, conflicts 0, errors 0`.
+- The full local database was copied into Neon (9 tables, 801 rows, counts
+  verified table by table), so the hosted app serves the same users,
+certificates, revocations, verifications and AI analyses as the local one.
+  Existing passwords work, because bcrypt hashes are copied as they are.
+
+Two container issues were found by actually deploying, and both are fixed in
+this repo — keep them fixed:
+
+1. `npm ci` failed with `EBADPLATFORM` because `package-lock.json` carried a
+   stray, darwin-only `fsevents` entry marked `extraneous` and **not** optional,
+   so npm on Linux treated it as required. The entry is now `optional` and the
+   Dockerfile installs (and purges, in the same layer) `python3 make g++` so a
+   missing prebuild compiles instead of failing the build.
+2. Render probes open ports to choose a web service's port. The chain on
+   `0.0.0.0:7545` made it announce "New primary port detected: 7545" and restart
+   the deploy in a loop. `scripts/cloud-boot.js` now binds the chain to
+   `127.0.0.1` only, and the log reports "Detected service running on port 10000".
+
+Keep-alive: `.github/workflows/keep-alive.yml` pings the health endpoint every
+10 minutes so the free instance does not fall asleep (it needs Actions enabled on
+the repo; otherwise expect a ~1 minute cold start on the first visit).
+
 ## What you need (all free)
 
 1. **GitHub** — the repo above (already set up; deploy commits are on `main`).
