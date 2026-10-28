@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 /**
  * Real OCR / text extraction from the uploaded document.
@@ -59,6 +60,24 @@ async function getWorker() {
     });
   }
   return workerPromise;
+}
+
+/**
+ * Warm the extraction plumbing in the background (server startup) so the
+ * FIRST real upload after a cold start does not pay the one-off costs:
+ * Tesseract worker creation + language/wasm load, first pdfjs-dist import,
+ * first sharp load. Creates nothing on failure - the normal lazy paths
+ * simply take over at first use, exactly as before warmup existed.
+ */
+async function warmup() {
+  try {
+    await getWorker();
+    console.log('[ocr] warmed: tesseract worker ready');
+  } catch (err) {
+    console.warn('[ocr] warmup: worker not ready yet -', err.message);
+  }
+  try { await getPdfjs(); } catch (_) { /* pdf imports lazily on first PDF as before */ }
+  getSharp();
 }
 
 function discardWorker() {
@@ -137,6 +156,12 @@ async function sparseSecondOpinion(prepared) {
 async function extractImageRegion(filePath, { topRatio = 0, bottomRatio = 1, scale = 3 } = {}) {
   const sharp = getSharp();
   if (!sharp) return '';
+  /* Latency guard: the crop used to upscale to width*width WITHOUT a cap,
+     so a 1800px-wide upload spawned a 5400px-wide Tesseract pass (tens of
+     seconds on the free-tier CPU). Cap at the same 1800px the primary pass
+     uses - phone-shot crops (~500px * 3 = ~1500px) are untouched, exactly
+     the regime these rescues were measured on. */
+  const CROP_MAX_WIDTH = 1800;
   try {
     const original = await fs.promises.readFile(filePath);
     const meta = await sharp(original).metadata();
@@ -148,7 +173,7 @@ async function extractImageRegion(filePath, { topRatio = 0, bottomRatio = 1, sca
       .extract({ left: 0, top, width: meta.width, height })
       .grayscale()
       .normalise()
-      .resize({ width: Math.round(meta.width * scale), kernel: 'lanczos3' })
+      .resize({ width: Math.min(Math.round(meta.width * scale), CROP_MAX_WIDTH), kernel: 'lanczos3' })
       .sharpen({ sigma: 1.2 })
       .png()
       .toBuffer();
@@ -264,20 +289,86 @@ async function extractPdfText(filePath) {
   return out.trim();
 }
 
+/*
+ * Short-lived memoization of extractFields, keyed by the SHA-256 of the file
+ * CONTENT (not the path). Real patterns this serves:
+ *  - issuance: the review screen extracts a document via /api/ocr/extract,
+ *    then the browser re-uploads the SAME file to /api/certificates, which
+ *    re-runs the whole tesseract pipeline on byte-identical content;
+ *  - verify-then-analyze flows on the same document.
+ * OCR of byte-identical input is deterministic, so a cached result is the
+ * exact result a fresh pass would produce. TTL 10 min and bounded size;
+ * cache misses simply fall through to the normal extraction.
+ * A SHALLOW CLONE is returned so callers can never mutate a cached result:
+ * every consumer only reads {status, text, fields, error} directly.
+ */
+const EXTRACT_CACHE_TTL_MS = 10 * 60 * 1000;
+const EXTRACT_CACHE_MAX = 20;
+const extractCache = new Map(); // digest -> { expires, value }
+
+async function fileDigest(filePath) {
+  const buf = await fs.promises.readFile(filePath);
+  return crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+function cacheGet(digest) {
+  const hit = extractCache.get(digest);
+  if (!hit) return null;
+  if (hit.expires <= Date.now()) {
+    extractCache.delete(digest);
+    return null;
+  }
+  // LRU order refresh, then hand out a copy.
+  extractCache.delete(digest);
+  extractCache.set(digest, hit);
+  return { ...hit.value };
+}
+
+function cachePut(digest, value) {
+  // Never cache a soft-read failure (file vanished mid-read): the next
+  // attempt may hit an actually existing file again.
+  if (!value || value.status === 'failed') return;
+  extractCache.set(digest, { expires: Date.now() + EXTRACT_CACHE_TTL_MS, value });
+  while (extractCache.size > EXTRACT_CACHE_MAX) {
+    const oldest = extractCache.keys().next().value;
+    extractCache.delete(oldest);
+  }
+}
+
 /**
  * Extract raw text plus best-effort field suggestions from a real document.
  * Returns { status: 'completed' | 'insufficient' | 'failed', text, fields, error }
  */
 async function extractFields(filePath, mimetype) {
+  let digest = null;
+  try {
+    digest = await fileDigest(filePath);
+  } catch (err) {
+    return { status: 'failed', text: '', fields: {}, error: err.message || 'Could not read this document.' };
+  }
+  const cached = cacheGet(digest);
+  if (cached) return cached;
+  const result = await extractFieldsUncached(filePath, mimetype);
+  cachePut(digest, result);
+  return { ...result };
+}
+
+async function extractFieldsUncached(filePath, mimetype) {
   const fields = {};
   let text = '';
   let imagePrepared = null;
   let imageSparse = null; // sparse PSM 11 text when extractImageText already ran it
+  const timings = { primary: 0, sparse: 0, top: 0, bottom: 0, kind: '' };
+  const ext0 = Date.now();
   try {
     if (mimetype === 'application/pdf') {
+      timings.kind = 'pdf';
       text = await extractPdfText(filePath);
     } else {
+      timings.kind = 'image';
+      const p0 = Date.now();
       const ocr = await extractImageText(filePath);
+      timings.primary = Date.now() - p0;
       text = ocr.text;
       imagePrepared = ocr.prepared;
       imageSparse = ocr.sparseText;
@@ -325,7 +416,9 @@ async function extractFields(filePath, mimetype) {
       // studentName can be a bare label fragment ("CANDIDATE") while the
       // primary found none — names come only from the structured TOP crop
       // below; the sparse pass contributes institution/degree/reg/session.
+      const s0 = Date.now();
       const sparseText = await sparseSecondOpinion(imagePrepared);
+      timings.sparse = Date.now() - s0;
       if (sparseText) {
         const rescued = inferFields(sparseText);
         for (const k of missingCore) {
@@ -342,7 +435,9 @@ async function extractFields(filePath, mimetype) {
     }
     if (fields.studentName === undefined || fields.registrationNumber === undefined) {
       // Targeted TOP-crop 3x rescue for the name / register rows.
+      const t0 = Date.now();
       const rescueText = await extractImageRegion(filePath, { topRatio: 0, bottomRatio: 0.42 });
+      timings.top = Date.now() - t0;
       if (rescueText) {
         const rescued = inferFields(rescueText);
         for (const k of ['studentName', 'registrationNumber']) {
@@ -352,13 +447,17 @@ async function extractFields(filePath, mimetype) {
     }
     if (fields.marks === undefined && marksCallable) {
       // CGPA/credits summary prints at the page bottom, below the courses.
+      const b0 = Date.now();
       const bottomText = await extractImageRegion(filePath, { topRatio: 0.70, bottomRatio: 1, scale: 3 });
+      timings.bottom = Date.now() - b0;
       if (bottomText) {
         const rescuedMarks = inferFields(bottomText);
         if (rescuedMarks.marks) fields.marks = rescuedMarks.marks;
       }
     }
   }
+
+  console.log(`[ocr] extract ${timings.kind}: total ${Date.now() - ext0} ms (primary ${timings.primary}, sparse ${timings.sparse}, top ${timings.top}, bottom ${timings.bottom}, fields ${Object.keys(fields).length})`);
 
   return { status: 'completed', text: cleaned, fields, error: null };
 }
@@ -810,4 +909,4 @@ function inferFields(text, opts) {
   return out;
 }
 
-module.exports = { extractFields, inferFields, extractImageText, sparseSecondOpinion };
+module.exports = { extractFields, inferFields, extractImageText, sparseSecondOpinion, extractImageRegion, warmup };

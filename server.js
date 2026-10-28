@@ -178,6 +178,16 @@ async function start() {
 
   app.listen(PORT, () => {
     console.log(`BlockCert AI running at http://localhost:${PORT}`);
+    // Background warm-up of the OCR/analysis plumbing (tesseract worker,
+    // language data, pdfjs, sharp, canvas) so the first upload/verification
+    // after a cold start does not pay one-off load costs. Fire-and-forget:
+    // it must never delay readiness or take the server down.
+    setTimeout(() => {
+      try {
+        require('./services/ocrService').warmup();
+        require('./services/documentImage').warmup();
+      } catch (_) { /* lazy import paths still work */ }
+    }, 0);
   });
 }
 

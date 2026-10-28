@@ -154,4 +154,16 @@ function getLastError() {
   return lastError;
 }
 
-module.exports = { prepareDocumentImage, getLastError };
+/**
+ * Warm the lazy vision plumbing (sharp, @napi-rs/canvas, first pdfjs import)
+ * in the background at startup so the first AI analysis of an uploaded
+ * document after a cold start pays no module-load cost. Failures are
+ * swallowed: the normal lazy paths retry exactly as before.
+ */
+async function warmup() {
+  getSharp();
+  getNapiCanvas();
+  try { await getPdfjs(); } catch (_) { /* imports lazily on first PDF as before */ }
+}
+
+module.exports = { prepareDocumentImage, getLastError, warmup };
