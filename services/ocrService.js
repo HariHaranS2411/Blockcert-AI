@@ -219,8 +219,18 @@ async function preprocessForOcr(buffer) {
     const width = meta.width || 0;
     if (!width || !meta.height) return buffer;
     const pipeline = sharp(buffer).grayscale().normalise();
-    // Only enlarge small scans; never shrink a high-resolution upload.
-    if (width < 1800) pipeline.resize({ width: 1800, kernel: 'lanczos3' });
+    /* Normalize BOTH directions to the width the whole pipeline was tuned
+       and measured on (1800px, from a 482px phone scan): enlarge small
+       scans as before, AND cap huge phone photos (3000-4000px wide) to the
+       same ceiling. Measured on the free tier (586px input -> 86 s total,
+       2100px input -> 50 s primary pass): tesseract cost scales with pixel
+       volume, so a 4000px overshoot roughly doubles the run time and its
+       noticeably larger intermediate buffer is what pushed the 512 MB
+       container over the limit and got the instance OOM-restarted
+       mid-request (client 502). Capping does not LOSE readable text:
+       1800px is where the rescue passes and field inference were already
+       measured to read grade sheets legibly. */
+    pipeline.resize({ width: 1800, kernel: 'lanczos3' });
     const out = await pipeline.sharpen({ sigma: 1.2 }).png().toBuffer();
     return out && out.length ? out : buffer;
   } catch (_) {
